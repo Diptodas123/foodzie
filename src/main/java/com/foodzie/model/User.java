@@ -17,8 +17,6 @@ import java.util.UUID;
 @Setter
 public class User {
 
-    private static final String DEFAULT_PROFILE_PICTURE = "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg";
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -45,8 +43,6 @@ public class User {
     @Size(min = 10, max = 15, message = "Phone number must be between 10 and 15 characters")
     private String phoneNumber;
 
-    @Column(nullable = false)
-    @ColumnDefault("'https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg'")
     private String profilePicture;
 
     private String address;
@@ -60,9 +56,6 @@ public class User {
 
     @PrePersist
     private void applyDefaults() {
-        if (profilePicture == null || profilePicture.isBlank()) {
-            profilePicture = DEFAULT_PROFILE_PICTURE;
-        }
         if (role == null) {
             role = Role.USER;
         }

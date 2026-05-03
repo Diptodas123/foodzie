@@ -23,8 +23,8 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final ModelMapper modelMapper;
 
-    private final static String ACCESS_TOKEN = "access";
-    private final static String REFRESH_TOKEN = "refresh";
+    private final static String ACCESS = "access";
+    private final static String REFRESH = "refresh";
 
     public UserService(UserRepository userRepository, JwtUtil jwtUtil, ModelMapper modelMapper) {
         this.userRepository = userRepository;
@@ -64,7 +64,7 @@ public class UserService {
             log.warn("Refresh token validation failed");
             throw new InvalidTokenException("Refresh token is invalid or expired.");
         }
-        if (!REFRESH_TOKEN.equals(jwtUtil.extractTokenType(refreshToken))) {
+        if (!REFRESH.equals(jwtUtil.extractTokenType(refreshToken))) {
             throw new InvalidTokenException("Provided token is not a refresh token.");
         }
         String email = jwtUtil.extractEmail(refreshToken);
@@ -94,7 +94,7 @@ public class UserService {
         if (!jwtUtil.validateToken(token)) {
             throw new InvalidTokenException("Token is invalid or expired.");
         }
-        if (!ACCESS_TOKEN.equals(jwtUtil.extractTokenType(token))) {
+        if (!ACCESS.equals(jwtUtil.extractTokenType(token))) {
             throw new InvalidTokenException("Only access tokens are allowed here.");
         }
         String email = jwtUtil.extractEmail(token);

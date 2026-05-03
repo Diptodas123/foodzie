@@ -32,7 +32,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain
     ) throws ServletException, IOException {
         try {
-            String token = cookieUtil.extractCookie(request, "accessToken");
+            String token = cookieUtil.extractCookie(request, Constants.ACCESS_TOKEN);
             if (jwtUtil.validateToken(token) && "access".equals(jwtUtil.extractTokenType(token))) {
                 String email = jwtUtil.extractEmail(token);
                 String role = jwtUtil.extractRole(token);

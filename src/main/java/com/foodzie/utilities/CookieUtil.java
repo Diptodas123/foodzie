@@ -21,13 +21,13 @@ public class CookieUtil {
     }
 
     public void setTokenCookies(HttpServletResponse response, String accessToken, String refreshToken) {
-        response.addCookie(buildCookie("accessToken", accessToken, 3600));      // 1 hour
-        response.addCookie(buildCookie("refreshToken", refreshToken, 604800));  // 7 days
+        response.addCookie(buildCookie(Constants.ACCESS_TOKEN, accessToken, 3600));      // 1 hour
+        response.addCookie(buildCookie(Constants.REFRESH_TOKEN, refreshToken, 604800));  // 7 days
     }
 
     public void clearTokenCookies(HttpServletResponse response) {
-        response.addCookie(buildCookie("accessToken", "", 0));
-        response.addCookie(buildCookie("refreshToken", "", 0));
+        response.addCookie(buildCookie(Constants.ACCESS_TOKEN, "", 0));
+        response.addCookie(buildCookie(Constants.REFRESH_TOKEN, "", 0));
     }
 
     public Cookie buildCookie(String name, String value, int maxAgeSeconds) {

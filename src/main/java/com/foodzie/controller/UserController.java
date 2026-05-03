@@ -3,13 +3,14 @@ package com.foodzie.controller;
 import com.foodzie.dto.AuthResponse;
 import com.foodzie.dto.LoginUserDTO;
 import com.foodzie.dto.UserDTO;
+import com.foodzie.utilities.ResponseUtil;
 import com.foodzie.model.User;
 import com.foodzie.service.UserService;
+import com.foodzie.utilities.Constants;
 import com.foodzie.utilities.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,53 +20,60 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final ModelMapper modelMapper;
     private final CookieUtil cookieUtil;
+    private final ResponseUtil responseUtil;
 
     public UserController(
             UserService userService,
-            ModelMapper modelMapper,
-            CookieUtil cookieUtil
+            CookieUtil cookieUtil,
+            ResponseUtil responseUtil
     ) {
         this.userService = userService;
-        this.modelMapper = modelMapper;
         this.cookieUtil = cookieUtil;
+        this.responseUtil = responseUtil;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> register(@Valid @RequestBody User user) {
+    public ResponseEntity<?> register(@Valid @RequestBody User user) {
         User saved = userService.registerUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(modelMapper.map(saved, UserDTO.class));
+        return responseUtil.buildResponse(
+                saved,
+                UserDTO.class,
+                "User registered successfully",
+                HttpStatus.CREATED
+        );
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> login(
+    public ResponseEntity<?> login(
             @Valid @RequestBody LoginUserDTO user,
             HttpServletResponse response
     ) {
         AuthResponse auth = userService.loginUser(user);
         cookieUtil.setTokenCookies(response, auth.getAccessToken(), auth.getRefreshToken());
-        return ResponseEntity.ok(auth.getUser());
+        return responseUtil.buildResponse(auth.getUser(), "Login successful");
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<UserDTO> refresh(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = cookieUtil.extractCookie(request, "refreshToken");
+    public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = cookieUtil.extractCookie(request, Constants.REFRESH_TOKEN);
         AuthResponse auth = userService.refreshToken(refreshToken);
         cookieUtil.setTokenCookies(response, auth.getAccessToken(), auth.getRefreshToken());
-        return ResponseEntity.ok(auth.getUser());
+        return responseUtil.buildResponse(auth.getUser(), "Token refreshed successfully");
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
+    public ResponseEntity<?> logout(HttpServletResponse response) {
         cookieUtil.clearTokenCookies(response);
-        return ResponseEntity.noContent().build();
+        return responseUtil.buildResponse("Logged out successfully");
     }
 
     @GetMapping("/user-info")
-    public ResponseEntity<UserDTO> getUserInfo(HttpServletRequest request) {
-        String accessToken = cookieUtil.extractCookie(request, "accessToken");
-        return ResponseEntity.ok(userService.getUserInfo(accessToken));
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
+        String accessToken = cookieUtil.extractCookie(request, Constants.ACCESS_TOKEN);
+        return responseUtil.buildResponse(
+                userService.getUserInfo(accessToken),
+                "User info retrieved successfully"
+        );
     }
-
 }

@@ -1,8 +1,10 @@
 package com.foodzie.config;
 
 import com.foodzie.utilities.JwtAuthFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,9 +21,14 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final String clientUrl;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig(
+            JwtAuthFilter jwtAuthFilter,
+            @Value("${app.client.url:http://localhost:5173}") String clientUrl
+    ) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.clientUrl = clientUrl;
     }
 
     private static final String[] PUBLIC_URLS = {
@@ -51,9 +58,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of("http://localhost:3000"));
-        corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        corsConfig.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+        corsConfig.setAllowedOrigins(List.of(clientUrl));
+        corsConfig.setAllowedMethods(List.of(
+                HttpMethod.GET.name(),
+                HttpMethod.POST.name(),
+                HttpMethod.PUT.name(),
+                HttpMethod.DELETE.name(),
+                HttpMethod.PATCH.name(),
+                HttpMethod.OPTIONS.name()
+        ));
+        corsConfig.setAllowedHeaders(List.of(
+                HttpHeaders.AUTHORIZATION,
+                HttpHeaders.CONTENT_TYPE,
+                HttpHeaders.CACHE_CONTROL
+        ));
         corsConfig.setAllowCredentials(true);
         return request -> corsConfig;
     }
